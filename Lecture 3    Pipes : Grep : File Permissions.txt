@@ -1,0 +1,68 @@
+Lecture 3    Pipes / Grep / File Permissions
+
+stdout is buffered, stderr is not
+
+=== Motivating Example ===
+	Q: How many words occur in the first 10 lines of sample.txt
+	   --
+	   | $> head -10 sample.txt > temp.txt
+	   | $> wc -w temp.txt
+	   | $> rm temp.txt
+	   --
+	Connect the output of one program to be the input of the next program
+			stdin1  ---------  stdin2   ---------
+		 ---------->| prog1 |---------->| prog2 | ------> use a pipe
+		            --------- stdout1   ---------
+    $> head -10 sample.txt | wc -w
+
+
+Q: Suppose files words1.txt & words2.txt contain list of words, one per line.
+   Print a duplicate free list of all words in words*.txt
+
+   $> cat words*.txt | sort | uniq 
+   							   |
+   							  doesn't eliminate words that are not consecutive
+
+Use the output of a program as an argument to another
+	- use backquotes ` `
+	  eg. $> echo Today is `date`
+	- double quotes will still allow embedded commands to execute
+	  eg. $> echo "Today is `date`"
+	- single quotes will not
+
+=== Search Within a File ===
+	grep: global regular expression pattern
+	egrep: extended grep
+	usage: $> egrep pattern file
+					   |
+					any regular expression
+	output: prints every line in file that contains the pattern
+	eg. $> egrep "CS246|cs246" file
+		$> egrep "(cs|CS)246" file
+		$> egrep "(c|C)(s|S)246" file
+
+
+	[abc] === a|b|c   ->any one character from this list
+	[^abc]            ->any one character not in this list
+	?				  ->0 or 1 of the preceding expression
+	*				  ->0 or more of the preceding expression
+	+				  ->1 or more of the preceding expression
+	.				  ->any one character
+	.* 				  ->0 or more of any character
+	.+				  ->1 or more of any character
+	^				  ->matched lines must begin with the pattern
+	$				  ->matched lines must end with the pattern
+	\ 				  ->to escape a character with special meanings, except inside[]
+	eg. $> egrep "CS ?246" -> CS246/CS 246
+		$> egrep "(CS ?)?246" -> CS246/CS 246/246
+		$> egrep "(CS )?246" -> CS 246/246
+		$> egrep "^CS246"
+		$> egrep "CS246$"
+		$> egrep "^CS246$" -> lines containing just CS246
+		$> egrep "\*"
+		$> egrep "\?"
+	Q: Print all word of even length from /usr/share/dict/words.
+	   $> egrep "^(..)+$" /usr/share/dict/words
+
+	Q: Print all files in the current directory, whose name contains exactly 1 a.
+	   $> ls | egrep "^[^a]*a[^a]*$"

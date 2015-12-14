@@ -1,0 +1,60 @@
+Lecture 2    Linux Commands
+
+Suppose
+	$> pwd is /u/nananeem/cs246
+	$> cd 1159/a2/q2/test
+				|
+		  Relative path: a path relative to the current directory
+	pwd + relative path = absolute path
+
+
+=== Special Directories ===
+	1. . -> current directory
+	  eg. $> cd .
+	2. .. -> parent directory
+	  eg. $> cd ..
+	  	  $> cd ../../q3
+	3. ~ -> home directory
+	  eg. $> cd ~
+	  	  $> cd ~/cs136
+	4. ~userid -> userid's home directory
+	  eg. $> cd ~lushman -> absolute path
+
+=== Listings Commands ===
+	$> ls
+	   displays the contents of the directory
+	   - except for hidden files
+	$> ls -a -> akk fukes
+
+=== Wildcard Matching ===
+	eg. $> ls *.txt -> matching everything ending in .txt
+
+=== Globbing Pattern ===
+	$> ls sample.txt t1.txt t2.txt
+	$> ls *.txt
+	$> echo *.txt
+	$> echo "*.txt"
+	$> echo '*.txt'
+	Single and double quotes will revent the expansion of globbing pattern
+
+=== Working with a file ===
+	$> cat fileLocation  -> displays the content of the file
+	To kill any program / command:
+		ctrl + c
+	To kill the program that no more input is comming:
+		ctrl + d  -> sends an EOF signal
+	$> command arg > output.txt -> overwrite output.txt, output redirection
+	$> command arg >> output.txt -> append to output.txt
+	$> command arg < fileLocation  -> input redirection
+	$> wc filename
+	$> wc < filename -> can't do this because wc doesn't know the filename
+	$> command arg < in > out
+
+Every process comes with 3 streams:
+		stdin	    -----------    stdout
+	--------------->| process |-------------->  default: screen
+  default: screen   -----------                 > reconfigures to a file
+  < changed to a file   \
+						 \ stderror
+						  \>   default: screen
+						  	   2> reconfigures to a file

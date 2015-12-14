@@ -1,0 +1,93 @@
+Lecture 4    Permissions / Variables / Shell Scripts
+
+=== File Permissions ===
+	$> ls -l     -> long listing
+	   -rwxrw-r-- 1 nanaeem staff 123 date         abc.txt
+	   		|          |      |         |             |
+	   permissions   owner  group	last modified   filename
+
+	    rwx       rw-       r--
+	   |---|     |---|     |---| -> all other users
+	   	 |         |
+	 user bits   users in the same group as the file
+	   	(owners permissions)
+	   r -> read permission
+	   w -> write permission
+	   x -> execute permission
+
+	   |     Ordinary Files		   |                    Directories 				 |
+	---|---------------------------|-------------------------------------------------|
+	 r | read contents (eg. cat)   | see contents (eg. ls, globbing, tab completion) |
+	---|---------------------------|-------------------------------------------------|
+	 w | write contents            | add / remove Files                              |
+	---|---------------------------|-------------------------------------------------|
+	 x | run the file as a program | navigate into directory (eg. cd)				 |
+	---|---------------------------|-------------------------------------------------|
+
+	Owner is the only one with the permission to change file permissions (admin)
+	Command: change mode
+			 $> chmod <mode> file
+			 			|
+			  /         |                 \ 
+	ownership class  operation		   permission
+	  	u - users 		+ add         a       r
+	  	g - group 		- remove			 w
+	  	o - others		= set exactly	 	 x	
+	  	a - all
+
+	Q: Give others read permission
+	   $> chmod o+r file
+	Q: Revoke exec permission from group
+	   $> chmod g-x file
+	Q: Make everyone's permission rw
+	   $> chmod a=rw file
+	eg. chmod 743 file
+		111 100 011
+		rwx rwx rwx
+
+=== Shell Variables ===
+	$> x=1    -> create a variable x with the value 1 (string)
+	$> echo $x / ${x}
+	$PATH
+
+=== Shell Scripts ===
+	Script is a text file that contains linux commands executed as a program
+	---------------------------------
+	| #!/bin/bash    ->shebang line |
+	| pwd 							|
+	| whoami						|
+	| date							|
+	---------------------------------
+	./basic  -> in the current directory, run this program
+	The script directory must be on the $PATH or current directory
+	Make sure execute bit is set -> $> chmod a+x file 
+
+=== Command Line Arguments ===
+	Within a script
+		Argument1 is accessible through $1
+		Argument2 is accessible through $2
+		./script arg1 arg2
+				  |    |
+				  $1   $2    $3/empty string
+	Q: Check whether a given word is in the directory
+	   usage: ./isItAWord word
+	   --------------------------------------
+	   | #!/bin/bash						|
+	   | egrep "^$1$" /usr/share/dict/words |
+	   --------------------------------------
+	Q: A good passwordd is not in the dictionary
+	   Assess whether a given word is a good password
+	   ----------------------------------------------------------------
+	   | #!/bin/bash 												  |
+	   | egrep "^${1}$" > /dev/null -> black hole to throw away output|
+	   | if [ $? -eq 0 ]; then										  |
+  	   |	echo Not a good password 								  |
+	   | else											              |
+       |    echo Maybe a good password 								  |
+	   | fi 														  |
+	   ----------------------------------------------------------------
+
+All programs return a status code: 0 for success, nonzero for failure
+egrep has status code 0 if pattern is matched
+					  1 if never matched
+	 ----------------------------------

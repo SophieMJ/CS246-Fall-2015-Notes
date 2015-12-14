@@ -1,0 +1,36 @@
+Lecture 1    Admin Stuff / Linux Shell
+
+
+=== Linux Shell ===
+	Shell: interface to the operating system
+	Graphical Shells:
+			+ intuitive to use
+			- hard / difficult to do things the UI is not designed for
+	Command-line Shells:
+			- you get a prompt, you type commands
+			- not intuitive: very steep learning curve
+			+ absolutely brilliant once over the curve
+	- original shell by Stephen Bourne
+	- C Shell (csh), Korn Shell
+
+	$> echo $0 -> what shell you are running
+
+=== Linux File System ===
+	contains files in a tree structure
+	Directory: can contain other files
+	"Ordinary Files": cannot contain files
+	            / ->root directory
+	     /   /    \   \
+	   bin  etc users usr
+	         |     |     \     \
+	     shells  nanaeem  bin   include 
+	              /   \
+	           CS241 CS246
+	Absolute path: location of a file by specifying a path starting at the root directory
+		eg. /bin -> bin under root directory
+			/usr/bin -> bin under usr under root directory
+	Current directory: the location / directory you are currently in
+	$> pwd -> print present working directory
+	$> cd abs -> change directory
+		   |
+		  absolute path (argument)
