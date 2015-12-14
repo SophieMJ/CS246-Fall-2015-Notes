@@ -1,0 +1,97 @@
+Lecture 5    Shell Script / Testing C++
+
+Use $# to get the number of args to a script / function
+./goodPassword hello
+  |----------| |---|
+       $0		 $1 
+
+=== Loop ===
+	while loop:
+		Q: Prime numbers from 1 to $1
+		---------------------------
+		| #!/bin/bash			  |
+		| x=1 					  |
+		| while [ $x -le $1 ]; do |
+		| 		echo ${x}		  |
+		|		x=$((x + 1)) 		  |
+		| done					  |
+		---------------------------
+	
+	for loop:
+		Q: Rename all .c files to .cc
+			1. mv hello.c to hello.cc
+			2. file=hello.c
+			   mv ${file} ${file%c}cc
+			   use # to remove a prefix
+			   		eg. ${file#abc}
+		--------------------------------
+		| #!/bin/bash 				   |
+		| for name in *.C; do          |
+        |		mv ${name} ${name%C}cc |
+  		| done 						   |
+  		--------------------------------
+
+	  	--------------------------
+		| #!/bin/bash 			 |
+		| for x in a b c d; do   |
+        |		echo ${x}        |
+  		| done 					 |
+  		--------------------------
+
+  		Q: How many times does $1 appears in $2
+  		--------------------------------
+		| #!/bin/bash			       |
+		| x=0 			  		   	   |
+		| for word in `cat $2`; do     |
+		| 		if [ $word = $1]; then |
+		|			x=$((x+1))	       |
+		|		fi 					   |
+		| done					       |
+		| echo #{x}					   |
+		--------------------------------
+
+
+Q: Pay date is the last Friday of every month. Find the date for this month
+	step 1: cal | awk '{print $6}'
+			-> Fri
+				6
+				13
+				21
+	step 2: cal | awk '{print $6}' | egrep [0-9] | tail -1
+Q: Look for the pay date for any month (last Friday)
+----------------------------------------------------------------------
+| answer () {														 |
+|	if [ $2 ]; then													 |
+|		preamble=${2}												 |
+|	else															 |
+|  	    preamble="This month" 										 |
+|   fi															     |
+|   if [ $1 -eq 31 ]; then											 |
+|   	echo "${preamble}'s payday is on the ${1}st."                |
+|   else															 |
+| 		echo "${preamble}'s payday is on the ${1}th."    			 |
+|   fi																 |
+| }																	 |
+| # note how $1 for the script is the SECOND argument to answer 	 |
+| answer `cal $1 $2 | awk '{print $6}' | grep "[0-9]" | tail -1` $1  |
+----------------------------------------------------------------------
+
+=== Testing ===
+	Black box tests:
+		- without access to code
+		- write tests before coding
+	Functional tests:
+		- test all features
+		- value for data
+		- positive vs. negative
+		- range of value
+		- boundaries (edge cases)
+		- multiple boundaries (corner cases)
+
+	eg. ./runSuite tests ./grt
+		tests
+		-----------------------
+		| t1 | t1.in   t1.out |
+		| t2 | t2.in   t2.out |
+		| t3 | t3.in   t3.out |
+		-----------------------

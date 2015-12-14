@@ -1,0 +1,122 @@
+Lecture 10    Dynamic Memory / More Review / Operators / The C++ Preprocessor
+
+Last time:
+    Prefer pass by reference to const over pass by value for anything larger than an int
+        - prevents the copy
+        - prevents changes to parameter
+    void foo(int &x);
+    void bar(const int &x);
+    foo(5); -> won't compile, 5 is not a lvalue
+    foo(y + y); -> won't compile, y+y is not a lvalue
+    bar(5);
+    bar(y + y);
+
+=== Dynamic Memory ===
+    Always allocate on the stack, unless:
+        1. the value must outlive the variable's scope
+        2. if size of collection/array is unknown or subject to resizing
+        3. a large memory allocation
+
+    In C:
+        int size = ...; // size of an array
+        malloc/free
+        int *p = malloc(size * sizeof(int));
+
+    Things are not a whole lot better in C++, but we don't have to do the "size * sizeof(int)" calculation.
+    C++ Does support malloc() and free(), but DON'T use it (disallowed in this course)!
+        instead, use 'new' and 'delete'
+
+        In the linked list example (in C):
+            struct Node {
+                int data;
+                Node *next;
+            }
+
+        Let's dynamically create a node, in C++:
+            Node *np = new Node;
+
+        'new' is type-aware.
+            We don't need to compute the amount of memory we want.
+            This is less error-prone. With 'new', you will always get enough memory (or you can receive an error, which we will come back to later).
+
+        When you are done with the node:
+            delete np;
+
+        "Do not mix malloc/free with new/delete, that is the worst thing that you can do! Bad things happen. Don't do it. This is what happens when you combine C/C++ codebases." - NN
+            delete looks at a book-keeping table that is only updated by new, so it can't recognize malloc'ed things.
+
+=== Dynamic Arrays ===
+    Suppose I read in a number and create an array of that size:
+        cin >> n;
+        int *arr = new int[n]; // dynamically allocated array of size n! new is smart enough to do this!
+        // You just tell n that you want n integers, and it uses its type-aware magic to calculate and allocate enough memory.
+
+    Once you are done:
+        delete [] arr; // a lot of people forget the '[]', then bad things happen.
+
+        "Some course notes say that 'delete arr' would just delete the first element of the array. This is nonsense, it's really an undefined thing that is compiler-specific. Just remember the '[]'" -NN
+
+    int *p = new int;
+    delete p; ->works
+    
+    If you allocated memory, it is still your job to deallocate it.
+
+    "And did I mention, don't forget the '[]'!" - NN
+
+    Q: Can you delete something by reference?
+    A: "Not sure, don't hold me to this, but I think that would work." - NN
+
+=== Operators ===
+    - C++ operators are implemented as functions
+    - C++ functions can be overloaded
+    - We can overload operators to give meaning to these operators for user defined types
+
+    struct Vec{
+        int x;
+        int y;
+    }
+    Vec v1,v2;
+
+    Vec v3 = v1 + v2;
+    Vec operator+(const Vec &a, const Vec &b) {  // if without const, can't do Vec v4 = v1 + v2 + v3
+        Vec v;
+        v.x = a.x + b.x;
+        v.y = a.y + b.y;
+        return v;
+    }
+    Vec v5 = 3 * v4;
+    Vec operator*(const int k, const Vec &v1) {
+        Vec v;
+        v.x = k * v1.x;
+        v.y = k * v1.y;
+    }
+    Vec operator*(const Vec &v1, const int k) {
+        return k * v1
+    }
+
+    struct Grade{
+        string name;
+        int grade;
+    }
+    Grade g;
+    cout << g;
+    ostream&operator<<(ostream &out, const Grade &g) {
+        cout << "Student:" << g.name;
+        cout << "Grade:" << g.grade << "%";
+        return out;
+    }
+    istream&operator>>(istream &in, Grade &g) {
+        in >> g.name;
+        in >> g.grade;
+        if (g.grade < 0) g.grade = 0;
+        if (g.grade > 100) g.grade = 100;
+        return in;
+    }
+
+=== Preprocessor ===
+
+               |--------------|          |--------------|
+    ---------> | Preprocessor | -------> |   Compiler   | --------------> 
+  source code  |--------------|  output  |--------------|
+
+  #include <- preprocessor directive: copy & paste

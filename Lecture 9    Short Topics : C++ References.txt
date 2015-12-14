@@ -1,1 +1,106 @@
 Lecture 9    Short Topics / C++ References
+
+=== Pointers ===						   ------------
+										   |		  |
+	int n = 5;                             |----------|
+	int *p = &n;                 n 10,000  |     5    |
+	cout << p; // prints 10,000			   |----------| 
+	cout << *p;	// prints 5 			   |		  |
+	int **pp = &p;						   |----------|
+	**pp = 10;					 p 48,000  |  10,000  |
+										   |----------|
+										   | 		  |
+										   |----------|
+							 	pp 60,000  |  48,000  |
+							 			   ------------
+	------------
+    | 	1	   |
+    |----------|
+    |	2	   |
+    |----------|    ->  continuous / contiguous piece of memory
+    | 	4	   |
+    |----------|
+    | 	8	   |
+    |----------|
+
+=== Arrays ===
+	Built in construct to store a collection of values
+	int a[] = {1,2,4,8};
+	The name of an array is shorthand for the address of the first element of the array.
+		a == &a[0];
+		*a == a[0];
+		*(a+1) == a[1];
+
+int x;
+scanf("%d", &x);
+
+=== Reference ===
+	c++ has another type called a Reference
+		int y = 10;
+		int &z = y;  -> z is a reference to y
+						z is somewhat like a constant pointer to y
+		int * const z = &y;
+	A reference is a constant pointer with automatic dereferencing
+		int y = 10;
+		int &z = y;
+		z = 100; -> sets y to 100
+		int *p = &z; -> p contains the address of y;
+	z is an alias for y, z is another name for y.
+	A reference cannot be left un-initialized. 
+		eg. int &z; 
+	You must initialize a reference to a lvalue(a storage location, something that has an address)
+		eg. With x = 10, these don't work: 
+			1. int &x = 5;
+			2. int &x = y + y;
+			3. 5 = 10;
+			4. y + y = 10;
+	---* Cannot create *---
+		1. pointer to reference
+		2. reference to reference
+		3. array of references
+	You can pass arguments by reference!!
+		***********************
+		* void inc(int &n) {  *
+		* 	 n+=1;			  *
+		* }					  *
+		* int main() {		  *
+		* 	 int x = 5;		  *
+		*	 inc(x);		  *
+		*	 cout << x;		  *
+		* }					  *
+		***********************
+
+	cin >> x == operator>>(cin,x);
+	istream &operator>>(istream &in, int &data){}
+
+	struct ReallyBig {.....}
+	void foo(ReallyBig rb) {.....}
+	ReallyBig x;		|
+	foo(x); ------------|   -> copy of x is must
+
+	void bars(ReallyBig &rb) {.....}
+	ReallyBig x;		 |
+	bars(x); ------------|  -> inside bars, rb is another name for x
+									- more efficient
+									- this suppresses the copy
+            						- changes to rb are visible to the caller
+            						- automatic dereferencing
+
+    void foobar(const ReallyBig &rb) {.....}
+    	- efficient since no copy
+    Always prefers reference to const
+    We pass by value for anything greater than an int
+
+
+    -> void f(int &x) {.....}
+    -> void g(const int &x) {.....}
+    	f(5); no
+    	f(y+y); no
+    	g(5); yes
+    	g(y+y); yes
+
+=== Dynamic Memory ===
+	Always allocate on the stack, unless:
+		1. the value must outline the variable's scope
+		2. the size of an array is unknow vs. subject to resize
+		3. a large memory allocation

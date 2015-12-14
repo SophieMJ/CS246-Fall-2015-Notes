@@ -1,1 +1,66 @@
 Lecture 8    IO in C++ / Short Topics
+
+*********************************
+* #include <iostream>			*
+* #include <fstream>			*
+* using namespace std;			*
+*     							*
+* int main () {					*
+*   ifstream file("suite.txt"); *
+*   string s;					*
+*   while (file >> s) {			*
+*     cout << s << endl;		*
+*   }							*
+* }								*
+*********************************
+Acquired the resource as part of initialization.
+We can treat a string as a data stream.
+
+io/buildString.cc
+io/getNum.cc
+io/readIntsSS.cc
+
+=== String ===
+	In C, use character arrays(null terminated) to represent a string
+		- manul memory management
+		- overwriting \0
+	C++ strings
+		- automatically resize
+		- safe
+		- string s = "hello";
+		 |--------|  |------|
+		 	 |			|
+		std::string   c style string
+	Implicit conversion from a c-style string(char *) to c++ string.
+	Reverse is not true.
+
+=== Operations ===
+	equality (s1 == s2)
+		!=  <  >  <=  >=
+	concatenation
+		In C, strcat(c1, c2)          In C++, s1 + s2
+			  char *c = ....c[i]           	  string s = .....s[i]; -> can access individual chars in a string
+	***************************************
+	* void print(string filename) {		  *
+	*  	 string s;						  *
+	*	 ifstream file(filename.c_str()); *
+	* }				   |--------------|	  *
+	*		    c-style string is expected*
+	***************************************
+
+=== Default Arguments ===
+	A parameter with a default argument cannot be followed by a parameter without a default argument.
+	void test(int num = 0; string city = "Waterloo");
+	test(); // 0, Waterloo
+	test(2); 
+	test(2, "Montreal");
+	test("Toronto"); -> doesn't work
+
+=== Function Overloading ===
+	You can have multiple functions with the same name as long as they have differnt # of parameters or types of parameters
+		1. void test();
+		2. void test(int );
+		3. void test(int , string ); 
+		4. void test(string tmp="hello", int x);  -> doesn't work
+		5. void test(string);
+		6. bool test(int num, string temp);  -> cannot overload function by just changing the return type

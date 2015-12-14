@@ -1,0 +1,14 @@
+Lecture 11    Preprocessor / Separate Compilation
+
+             |--------------|          |--------------|
+  ---------> | Preprocessor | -------> |   Compiler   | --------------> 
+source code  |--------------| changed  |--------------|
+							  source code
+
+#include <iostream>  <- preprocessor directive: copy & paste
+#include "vector.h" <- look in current directory
+#define VAR VALUE <- search for VAR and replace it with VALUE
+
+g++ -E  -> only run preprocessor
+g++ -E  -> no line numbers
+

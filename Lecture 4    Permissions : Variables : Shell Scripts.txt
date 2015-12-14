@@ -90,4 +90,16 @@ Lecture 4    Permissions / Variables / Shell Scripts
 All programs return a status code: 0 for success, nonzero for failure
 egrep has status code 0 if pattern is matched
 					  1 if never matched
-	 ----------------------------------
+	 ------------------------------------
+	 | if [ $? -eq 0 ]; then			|
+ 	 |		echo Not a good password 	|
+     | else								|
+     | 		echo Maybe a good password  |
+     | fi 								|
+     ------------------------------------
+     -e file check if file exists
+     -a and
+     -o or
+     -eq
+     -neq
+     

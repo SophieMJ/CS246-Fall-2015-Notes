@@ -1,1 +1,78 @@
 Lecture 7    C++ / IO
+
+if a read fails, then cin.fail() will be true.
+if the read fails due to EOF, then cin.eof() is ALSO true.
+
+eg. Read ints from stdin. Terminate if we encounter a non-int or EOF
+	*********************************
+	* int main() {					*
+ 	* 	int i;						*
+  	*	while (true) {				*
+    *		cin >> i;				*
+    *		if (cin.fail()) break;  *
+    *		cout << i << endl; 		*
+  	*	}							*
+	* }								*
+	*********************************
+
+In C, 2 + 3.7
+	  |	   |
+	double double
+In C++, there is an implicit conversion from cin(istream) to void*
+	if (cin) -> true if !cin.fail()
+	*****************************
+	* int main() {				*
+ 	* 	int i;					*
+  	*	while (true) {			*
+    *		cin >> i;			*
+    *		if (!cin) break;    *
+    *		cout << i << endl; 	*
+  	*	}						*
+	* }							*
+	*****************************
+In C, 21 >> 3 -> right bit shift
+In C++, cin >> x -> operator overloading
+		cin >> x >> y;
+	 	|-------|
+	 		cin  >> y;
+	 		|--------|
+cascading	 	  cin;
+
+Q: Read and echo all ints from stdin. Ignore any non ints. Terminate at EOF.
+	**********************************
+	*	int main () {				 *
+	*	  int i;					 *
+	*	  while (true) {			 *
+	*	    if (!(cin >> i)) {		 *
+	*	      if (cin.eof()) break;  *
+	*	      else {				 *
+	*	        cin.clear();		 *
+	*	        cin.ignore();		 *
+	*	      }						 *
+	*	    }						 *
+	*	    else {					 *
+	*	      cout << i << endl;	 *
+	*	    }						 *
+	*	  }							 *
+	*	}							 *
+	**********************************
+
+getline(cin, s);
+Reads from the first non-w's character to NEWLINE into s.
+		Nomair  |  519 xxx xxxx  |  288 Albert xxxxxxxxx
+		cin >> s   cin >> num		getline(cin, add)
+
+In C, printf     %d, %x
+In C++, int i = 95;
+		cout << i;  -> prints 95 in decimal
+
+C++ uses IO manipulators to format output
+	cout  << hex << i << dec;
+			|---|
+			  IO Manipulator
+
+The stream abstraction can be used with other data streams
+	#include <ifstream>
+	ifstream    -> input file stream, input from file
+	ofstream    -> write to file
+	

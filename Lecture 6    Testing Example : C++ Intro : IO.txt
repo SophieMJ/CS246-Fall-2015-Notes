@@ -1,1 +1,41 @@
 Lecture 6    Testing Example / C++ Intro / IO
+
+=== C++ ===
+	Bajarne Strustrup
+	Simula67   => C with classes
+	Most C programs are valid c++ program
+
+=== Sample Program ===
+	************************************
+	* #include <iostream>			   *
+	*								   *
+	* using namespace                  *
+	*								   *
+	* int main() {					   *
+	*	cout << "Hello World" << endl; *
+	*   return 0;					   *
+	* }								   *
+	************************************
+	C++ does have access to stdio.h(printf)
+
+include header <iostream>, you get access to the global variables:
+	std::cout, std::cin, std::endl
+Compile:
+	$> g++ hello.cc (-o helloWorld => to name the executable)
+	creates an executable a.out
+Run using ./a.out
+
+=== C++ I/O ===
+	C++ comes with 3 stream variables
+		- cout -> sends output to standard out
+		- cin -> get input from std input
+		- cerr -> send output to std error
+	Output operators
+		<<   "put to"
+		eg. cout << x;
+			cerr << "Hello";
+	Input Operators
+		>>   "get from"
+		eg. cin >> x;
+	Once a read fails all subsequent reads fail
+	
