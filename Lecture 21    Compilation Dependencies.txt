@@ -1,0 +1,136 @@
+Lecture 21    Compilation Dependencies
+
+	- Pointer to Implementation + Bridge Pattern
+	- The Big Three Revisited
+
+=== Compilation Dependencies ===
+	alist.h
+		#ifndef ALIST_H
+		#define ALIST_H
+
+		class BList;
+		class AList {
+			int data;
+			BList *next;
+		};
+	blist.h
+		#ifndef BLIST_H
+		#define BLIST_H
+
+		class AList;
+		class BList {
+			char data;
+			AList *next;
+		};
+	a.h
+		class A {
+			......
+		};
+	b.h
+		#include "a.h"
+		class B : public A {
+			......
+		};
+	c.h
+		#include "a.h"
+		class C {
+			A myA;
+		};
+	d.h  							d.cc
+		class A;						#include "d.h"
+		class D {						#include "a.h"
+			A *myA;						void D::foo() {
+			void foo();						myA->print();
+		};								}
+	e.h
+		class A;
+		class E {
+			A foo(A a);
+		}
+
+	client.cc
+		#include "window.h"
+		// Any changes to window.h (even to private members) requires client.cc to recompile
+		// To prevent that, let's create a pointer to implementation
+	windowImpl.h
+		struct XWindowImpl {
+			Display *d;
+		}						
+	window.h                					|---------|					 |-------------|
+		struct XWindowImpl;						| XWindow |♢--------------> | XWindowImpl |
+		class XWindow {							|---------|					 |-------------|
+				XWindowImpl *pImpl;
+			public:
+				......
+		}
+	window.cc
+		#include "window.h"
+		#include "windowImpl.h"
+														-----> pimpl idiom
+		void XWindow::drawRectangle(......) {
+			pImpl->d->update(.......);
+		}
+
+=== Generalization ===
+			|--------|					|------------|
+			| Window |♢--------------> | WindowImpl |
+			|--------|					|------------|
+											  ↑
+									|-------------------|
+							|-------------|	     |-------------|
+							| XWindowImpl |      | YWindowImpl |
+							|-------------|		 |-------------|	
+	Generalization of the pimpl-idiom to accomodate multiple implementation
+	Bridge Pattern
+
+	~~~ Low Coupling ~~~
+		- coding to an interface
+		- not exposing fields(public)
+		- no friends
+
+	~~~ High Cohesion ~~~
+		- classes work together to achieve a task
+		- mvc
+
+=== Big Three in The Presence of Inheritance ===
+	~~~ Destructors ~~~	(the base class destructor should be virtual)
+	class Book {
+			string title, author;
+			int numPages;
+		public:
+			.....
+	};
+	class TextBook : public Book {
+			string topic;
+		public:
+			....
+	};
+	TextBook b1 = TextBool(... , ... , .... , ...);
+	TextBook b2 = b1; // TextBook b2(b1);
+	TextBook::TextBook(const TextBook &other): Book(other), topic(other.topic) {}
+	Book::Book(const Book &other): title(other.title), author(other.author), numPages(other.numPages) {}
+	b1 = b2;
+	TextBook &TextBook::operator=(const TextBook &other) {
+		Book::operator=(other);
+		topic = other.topic;
+		return this;
+	}
+	
+	Book *pb1 = new TextBook("CS246", "Nomair", 200, "C++");
+	Book *pb2 = new TextBool("CS136", "Adam", 100, "C");
+	*pb1 = *pb2; // assignment operator using base class ptrs
+	print *pb1; // "CS136", "Adam", 100, "C++"  ---> Book::operator= called (since default operator is not virtual)
+			====> PARTIAL ASSIGNMENT PROBLEM
+
+	Make operator= virtual; 
+	class Book {
+		public:
+			virtual Book &operator=(const Book &);
+	};
+	class TextBook : public Book {
+		public:
+			virtual TextBook &operator=(const TextBook &);
+												❌ -> Book
+									   ====> MIXED ASSIGNMENT PROBLEM
+	};
+	

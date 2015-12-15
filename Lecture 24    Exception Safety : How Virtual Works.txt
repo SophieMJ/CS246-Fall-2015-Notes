@@ -1,0 +1,128 @@
+Lecture 24    Exception Safety / How Virtual Works / RW
+
+Last Time:
+	C++ Guarantee, during stack unwinding, all stack allocated data is reclaimed
+		void foo() {
+			MyClass *p = new MyClass;
+			MyClass q;
+			try { bar(); }
+			catch (...) {
+				delete p;
+				throw; 
+			}
+			delete p;
+		}
+		Never let the destructor throw an exception
+		- destructors are called during stack unwinding
+
+Recall: Resource acquisition is initialization
+			- All resources should be wrapped is a stack allocated object whose job is to free or release the resource
+			{ fstream file("myfile"); }
+
+What about dynamic memory?
+	- C++ 03 provides the template class::autopointer
+		- the constructor for autopointer, expects a pointer to dynamic memory
+		- the destructors for autopointers will call delete on the underlying pointer
+	    class Basic {
+	  	      int x;	
+	  	};
+	  	- auto_ptr<Basic> bp(new Basic(5));
+	  	- we can call bp->x
+		
+		void f() {
+			auto_ptr<MyClass> p(new MyClass); 
+			MyClass q;
+			g();
+		}
+
+		class C {....};
+		auto_ptr<C> p(new C);
+		auto_ptr<C> q = p; // p will be set to NULL, can't call p->....
+
+		- copy constructor / operator= actually steal the pointer to the underlying dynamic memory
+		- C++ 11 calls auto_pointer unique_ptr (to avoid double free)
+			trl::shared_ptr (two pointers point to the same memory use reference counting to check how many pointers are 				  pointing to the same dynamic memory, will only call delete while number is one to avoid 						 double delete)
+
+=== Levels of Exception Safety === 
+	1. Basic Guarantee: an exception doesn't cause a function to leave the program in an invalid state
+		eg. no memory leak, no dangling pointer
+	2. Strong Guarantee: if an exception occurs, its as if the function was never called
+		eg. program state us unchanged
+	3. No Throw Guarantee: function never fails, always achieve the task
+
+		class A {};
+		class B {};
+		class C {};
+		A a;
+		B b;
+		void f() {
+			a.g();
+			b.h(); => strong guarantee
+		}
+
+		Assume, g and h only have local side effects
+		void C::f() {
+			A tempa = a;
+			B tempb = b;
+			tempa.g();
+			tempb.h();
+			------------- good so far
+			a = tempa; => what if assignment operator throw an exception
+			b = tempb; 
+		}
+
+		struct CImpl {
+			A a;
+			B b;
+		}
+		class C {
+			auto_ptr<CImpl> pImpl;
+			void f() {
+				auto_ptr<CImpl> temp(new CImpl(*pImpl)); // got a copy temp
+				temp->a.g();
+				temp->b.h();
+				std::swap(pImpl, temp);
+			}
+		};  => strong guarantee
+
+
+=== How Virtual Works ===
+	Book *b = ....;
+	if (....) {
+		b = new TextBook;
+	} else {
+		b = new Comic;
+	}
+	b->isItHeavy();
+
+=== Function Call ===
+	- load the address of the code for the function
+	- jump to that address
+
+=== Non-Virtual Methods ===
+	- treated like function calls
+
+=== Virtual Methods === 
+	- create vtable
+		Book *b -----|
+					 |--= new Book(...)						  vtable
+					 |	 |----------|                      |----------| 				      
+					 |	 | Vpointer |--------------------->|  "Book"  |
+					 |	 |----------|					   |----------|
+					 |	 |  title	|					   |isItHeavy |  ----> Book::isItHeavy() {...}
+					 |	 |----------|					   |----------|
+					 |	 |  author  |					   | favorite |  ----> Book::favorite() {...}
+					 |	 |----------|				       |----------|		   ↑
+					 |	 | numPages |					   |..........|		   |
+					 |	 |----------|					   |----------|		   |
+					 |--= new TextBook(...)					  vtable		   |
+						 |----------|					   |----------|		   |
+						 | Vpointer |--------------------->|"TextBook"|		   |
+						 |----------|					   |----------|		   |
+						 |  title	|					   |isItHeavy |	 -----------> TextBook::isItHeavy() {...}
+						 |----------|					   |----------|		   |
+						 |  author  |					   | favorite |--------|
+						 |----------|					   |----------|
+						 | numPages |					   |..........|
+						 |----------|					   |----------|
+						 

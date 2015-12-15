@@ -1,1 +1,124 @@
 Lecture 13    The Big Three (copy ctor, dtor, assignment operator)
+
+Last Time:
+	- Classes
+	- Constructors
+	- MIL
+
+
+=== Copy Constructor ===
+	Student bobby (60, 70, 80);
+	Student billy = bobby; // Student billy(bobby);
+
+	Copy constructor constructs a new object as a copy of an existing object
+		- you get a built-in ctor
+
+	Every class has:
+		- default ctor
+		- copy ctor
+		- destructor
+		- copy assignment operator
+
+	For a class C, the copy ctor takes one parameter, a reference to const of type C
+
+	*************************************************************************************************
+	* struct Student() {    																		*
+	* 		int assns,mt,final;																		*
+	*		Student(const Student &other): assns(other.assns), mt(other.mt), final(other.final){} 	* -> the built-in copy
+	*************************************************************************************************    ctor
+
+	*************************************************************************
+	* struct Node {															*
+	* 		int data;														*
+	*		Node *next;														*
+	*		Node(int data, Node *next): data(data), next(next) {}			*
+	*		Node(const Node &other): data(other.data), next(other.next) {}	* -> built-in
+	* }																		*
+	*************************************************************************
+
+	Node *np = new Node(1, new Node(2, new Node(3, NULL)));
+	Node m = *np; // copy ctor
+	Node *npcopy = new Node(*np); // copy ctor
+
+			stack   |		heap
+		------------|----------------------------------------
+		   	np [] ---> [ 1 |  ] ----> [ 2 |  ] ----> [ 3 | \ ]
+		------------|-----------------/----------------------
+		 m [ 1 |  ] -----------------/
+		------------|---------------/------------------------
+		npcopy [] ---> [ 1 |  ] ---/
+		------------|----------------------------------------
+
+	The default copy ctor does a shallow copy.
+	Whenever dynamic memory is involved(the object is not continuous), you most likely want a deep copy.
+
+	*********************************************************************
+	* struct Node {														*
+	*		...															*
+	*		...															*
+	*		Node(const Node &other) {									*
+	*				data = other.data;									*
+	*				next = other.next ? new Node(*(other.next)) : NULL; *
+	*		}															*
+	* }																	*
+	*********************************************************************
+
+	A copy ctor is called:
+		1. when constructing an object as a copy of another Node m = n;
+		2. when an object is passed by value  -> reason for the rule that the parameter is reference type
+		3. when an object is returned by value
+
+=== Single Parameter Constructor ===
+
+	*****************************************************
+	* struct Node {    									*
+	* 		......										* 
+	*		......     									*
+	*		Node(int data) : data(data), next(NULL) {}	*
+	* }													*
+	*****************************************************
+
+	Node n(4);
+	foo(n);
+	void foo(Node n) {}
+	Node m = 4;
+	foo(4);
+
+	Single parameter ctors create implicit conversion
+		string str = "hello"
+			c++			c_style
+		std::string has a 1 parameter constructor with type const char*
+
+=== Destructor ===
+	When an object is destroyed, a special method called the destructor runs.
+	Stack allocated object is destroyed when it goes out of scope.
+	Heap allocated object is destroyed when it is deleted.
+	A class comes with a dtor.
+	Calls the dtors on fields that are objects:
+		- Each class has one dtor, which takes 0 parameters
+		- Dtor name is the name of the class prefixed with ~
+
+	Node *np = .............;
+		np [] ---> [ 1 |  ] ----> [ 2 |  ] ----> [ 3 | \ ]
+	delete np;  -> calling delete on NULL is safe
+
+	*************************************
+	* struct Node {    					*
+	* 		......						* 
+	*		......     					*
+	*		~Node() { delete next; }    *
+	* }									*
+	*************************************
+
+				.h files				 |  			 .cc files
+	-------------------------------------|----------------------------------------
+	type definitions with method header  | implementation of methods and functions
+	------------------------------------------------------------------------------
+
+=== Assignment Operator ===
+
+	Student bobby(billy); // copy ctor
+	Student jane; // 0 parameter ctor
+	jane = bobby; // jane.operator=(bobby)
+	Assignment operator updates an existing object as a copy of another
+	Student &operator=(const Student &other) {}

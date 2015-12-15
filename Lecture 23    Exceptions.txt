@@ -1,0 +1,81 @@
+Lecture 23    Exceptions
+
+Last Time:
+	You can dynamically cast to a reference.
+		Book *b = ........;
+		Comic &c = dynamic_cast<Comic &>(*b);
+	What if b is not pointing to a Comic?
+	Exception is thrown
+
+
+When an error occurs, an exception is thrown / raised
+	- if the exception is not handles, then program terminates
+	- you can handle these exceptions using try / catch blocks
+
+Stack unwinding: the process of popping the call stack repeatedly until a handler for an exception is found
+
+Error recovery in multiple steps:
+	try {........}
+	catch (SomeExn a) { // partial recovery
+		1. throw SomeOtherExn(....);
+		2. throw a; // throws the copy
+		3. throw; // throws the original exception again
+	}
+
+All exceptions from the standard c++ library inherit from a class, "exception"
+	try {.......}
+	catch (exception) {........}
+However, user defined exceptions need not inherit from "exception"
+Special syntax to catch ALL EXCEPTIONS:
+	try {.......}
+	catch (...) {.........}
+We can throw any value:
+	eg. int, char, bool
+Exception handling is typically much slower than normal control flow
+	class SomeExn{};
+
+Common C++ Exceptions:
+	bad_cast: dynamic_cast to reference fails
+	bad_alloc: new fails(no more heap space)
+	out_of_range: index out of bounds(Vector::at)
+
+	class BaseExn {};
+	class DerivedExn : public BaseExn {};
+	DerivedExn n = ........;
+	BaseExn &b = n;
+	try { throw b; }
+	catch (DerivedExn) {.......}
+	catch (BaseExn) {.......}
+	catch (...) {.......}
+
+	Book *b1 = new TextBook(.....);
+	Book *b2 = new TextBook(.....);
+	*b1 = *b2;
+Make Book::operator= virtual
+	TextBook &TextBook::operator=(const Book &other) {
+		TextBook &tother = dynamic_cast<TextBook &>(other);
+		Book::operator=(other);
+		topic = tother.topic;
+		return *this;
+	}
+Exceptions change everything!
+	void foo() {
+		MyClass *p = new MyClass;
+		MyClass q;
+		bar(); ----> can leak memory, if bar() throws an uncaught exception
+		delete p;
+	}
+Need to write exception safe code:
+	exceptions should not cause memory leaks, dangling pointers etc.
+C++ guarantee: during stack unwinding, all stack-allocated memory is reclaimed(q's space is reclaimed, dtor runs)
+	void foo() {
+		MyClass *p = new MyClass;
+		MyClass q;
+		try { bar(); }
+		catch (...) {
+			delete p;
+			throw; 
+		}
+		delete p;
+	}
+	

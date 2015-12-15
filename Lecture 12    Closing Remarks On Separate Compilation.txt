@@ -1,1 +1,111 @@
 Lecture 12    Closing Remarks On Separate Compilation / C++ Classes
+
+- NEVER include .cc files
+- NEVER use "using namespace std;" in .h files
+  always use std::string, std::fstream
+
+=== C++ Classes ===
+	OOP: we can put functions inside a struct
+	************************************
+	* struct Student {				   *
+	*		int assns, mt, final;	   *
+	*		float grade() {			   *
+	*			return 0.4 * assns +   *
+	*				   0.2 * mt +	   *
+	*				   0.4 * final;	   *
+	*		}						   *
+	* }								   *
+	************************************
+	Student s = {60, 60, 70};
+	s.grade;
+
+	- Class is a struct that can contain functions
+	- C++ has a "class" keyword
+	- An instance of a class is called an object
+	- A function that is inside a class is called a "member function" or "method"
+	- You must call a method on an object
+	- The method has access to the fields of the object on which the method was called
+		Student bobby = {60, 70, 80};
+		bobby.grade();
+
+	Difference between functions and methods	
+		- A method has a hidden parameter called this
+		- "this" is a pointer to the object on which method was called
+			this == &bobby
+			*this == bobby
+			(*this.assns) == this->assns
+
+=== Initializing Objects ===
+	C-style initialization requires compile time constants
+	C++ allows special method to construct objects -> constructness
+
+	*************************************************
+	* struct Student() {    						*
+	* 		int assns,mt,final;						*
+	*		Student(int assns, int mt, int final) {	*
+	*				this->assns = assns;			*
+	*				this->mt = mt;					*
+	*				this->final = finla;			*
+	*		}										*
+	* }												*
+	*************************************************
+
+	Student bobby(60, 70, 80);
+	istringstream ss(s);
+	Student bobby = Student(60,70,80);
+		   |- Student *pbobby = new Student(60, 70, 80);
+	heap --|  ...........
+		   |- delete pbobby;
+
+	You can overload constructors, give default arguments
+	Student billy(60, 70); // 0 final
+	Student Jane(60); // 0 final, 0 mt
+	Student newGuy; // 0 final = mt = assns
+	Student newGuy(); // warm / compile error
+	Student newGuy = Student() // value initialization
+	Student *newGuy = new Student;
+
+	Every class comes with a default constructor (0 param ctor)
+		- which calls the default ctors on fields that are objects
+	The default ctor goes away if you write any ctor.
+		*****************************
+		* struct Vec {    			*
+		* 		int x,y;			*
+		*		Vec(int x, int y) {	*
+		*			this->x = x;	*
+		*			this->y = y;	*
+		*		}					*
+		* }							*
+		*****************************
+		Vec v; -> no longer compiles (no 0 param ctor)
+	If you implement any ctor, you lose c-style initialization
+		Vec v = {1, 2};  -> won't compile
+		Vec v(1, 2);
+		*****************************
+		* struct MyStruct {    		*
+		* 		const int myConst; 	* = s	=> must be initialized
+		*		int &myref;     	* = m
+		* }							*
+		*****************************
+
+	- C++ 03 disallows field initializers
+	- C++ 03 disallows initializing constants and references in ctor body
+
+	When an object is created:
+		1. space is allocated (stack/ heap)
+		2. field initialization: default ctors
+		3. ctor body runs
+
+	Let's hijack step2:
+		Special Syntax: Member Initialization List (MIL)
+			- only available inside constructors
+				*************************************************************
+				* struct MyStruct {    										*
+				* 		const int myConst; 									* 
+				*		int &myref;     									*
+				*		MyStruct(int c, int &r) : myConst(c), myref(r) {}	*
+				* }															*
+				*************************************************************
+			- MIL is the only way to initialize constants and references
+				If a MIL does not initialize a field that is an object, the default ctor will be called
+			- Initialization always occurs in declaration order irrespective of the order in the MIL

@@ -12,3 +12,46 @@ source code  |--------------| changed  |--------------|
 g++ -E  -> only run preprocessor
 g++ -E  -> no line numbers
 
+
+=== Conditional Compilation ===
+	*******************
+	* #define MAX 10  *
+	*			      *
+	* int main(){	  *
+	*    int x[MAX];  *
+	* }				  *
+	*******************
+	Windows needed winMain
+	Linux needed main
+	- requires manually changing the value for the OS variable
+	- g++ -DOS=Unix
+
+	#define VAR -> gives empty string
+	g++ -DOS -> gives value 1
+	#ifdef -> true if VAR is defined
+	#ifndef -> true if VAR is not defined
+
+=== Separate Compilation
+	Separate our code into interface files(header, .h)
+		- user defined types
+		- function headers(declarations)
+	implementation file(.cc)
+		- actual implementation of functions 
+
+=== Compiling Multiple Files ===
+	1. g++ *.cc	 -> this is not separate compilation
+	2. g++ main.cc vector.cc 
+
+	- Never compile a header file!
+
+    Why? - concurrent processing
+  	     - just being able to compile a file separately and then merge it to produce the executable
+  	By default, g++ preprocessor -> compiler -> linker
+  		g++ -c   -> compile, do not link(do not produce executable)
+  		- produces object files(.o)
+  		  contains - compiled code
+  		  		   - list of NEEDs
+  		  		   - list of HAVEs
+  		once we have all the .o files   -> g++ main.o vector.o
+  		- calls the linker
+  		

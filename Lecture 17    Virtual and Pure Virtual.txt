@@ -1,0 +1,115 @@
+Lecture 17    Virtual and Pure Virtual
+
+Last Time: System Modeling
+	- composition, aggregation, inheritance
+	- private really means private to class
+	- protected keyword
+
+
+	class Book {
+		protected:
+			string title, author;
+			int numPages;
+	};
+	class TextBook : public Book {
+			string topic;
+		public:
+			void addAuthor(string auth) { auth += auth; }
+	}
+	int main() {
+		TextBook tb(.....);
+		tb.author = ......; ❌ because author is protected
+		tb.addAuthor(.....); ✅
+	}
+
+Advice: keep fields private
+	- provide protected accessors / mutators
+
+Want a different criteria for determining when a Book is heavy
+	Book    	 numPages > 200
+	TextBook	 numPages > 400
+	Comic 		 numPages > 30
+TextBook and Commic will overwrite the inherited isItHeavy method
+
+	class Book {
+			int numPages;
+		protected:
+			int getNumPages() { return numPages; }
+		public:
+			bool isItHeavy() { return numPages > 200; }
+	};
+	class TextBook : public Book {
+		public:
+			bool isItHeavy() { return getNumPages() > 400; }
+	};
+	class Comic : public Comic {
+		public:
+			bool isItHeavy() { return getNumPages() > 30; }
+	};
+	int main {
+		Book b(... , ... , 50);
+		cout << b.isItHeavy << endl; // false, Book::isItHeavy
+		Comic c(... , ... , 40);
+		cout << c.isItHeavy << endl; // true, Comic::isItHeavy runs
+		Book b2 = Comic (... , ... , 40, ...); // since Comic is a Book
+		b2.isItHeavy(); // Book::isItHeavy
+	  - object slicing / coersion
+	  	Comic c(... , ... , 40, ...);
+		Comic  *cp = &c;
+		cp->isItHeavy(); // true, Comic::isItHeavy 
+		Book *bp = &c; // NO SLICING
+		bp->isItHeavy(); // false, Book::isItHeavy
+
+- The computer used the declared type of the pointer to statically determine which method to call
+- If you do not want this default behaviour, make the method "virtual"
+	- prefix isItHeavy in class Book as virtual
+- A method that is virtual is dynamically dispatched. The actual method to call is determined at runtime using the runtime 	 type of the object
+- Virtual has a small cost, because the decision to choose a method is made while the program is running
+	
+	Book *collection[100];
+	for (int i = 0; i < 100; i++) {
+		cout << collection[i]->getTitle();
+		cout << collection[i]->isItHeavy();
+	} -> Polymorphic array (multiple forms)
+
+Polymorphism: ability to accomodate multiple types under one abstraction
+	collection[0]->prolog; ❌
+When the dtor for a subclass runs, the dtor for the superclass is automatically called
+
+=== Pure Virtual / Abstract / Concrete ===
+							     |-------------------|  
+								 | Student  		 |
+								 |-------------------|
+								 |#numCourses: Int   |  
+								 |-------------------|  
+						virtual	 |+fees()            |  -> There is no student who is just a Student(not co-op or regular)
+								 |-------------------|  		- do not have an implementation: Student::fees()
+				 			              ↑
+									 	  |
+						   |-----------------------------|
+						   |						 	 |
+		 			|------------|				   |------------|
+		 			| Regular    |				   |   Co-op    |
+		 			|------------|				   |------------| 
+  Implementation<---|+fees():Int |				   |+fees():Int	|--->Implementation
+		 			|------------|				   |------------|
+		class Student {
+			...
+			...
+			public:
+				virtual int fees() = 0;
+		};
+	- Pure virtual method has no implementation
+	- A class that has even one pure virtual method is abstract
+
+	cannot instantiate objects of an abstract class
+		Student s; <- won't compile
+		s.fee();
+	+polymorphism
+		Student *myClass[511];
+		for (........) {
+			myClass[i]->fees();
+		} 
+	A subclass does inherit every pure virtual method
+	- a class which implements all pure virtual methods is "concrete"
+	

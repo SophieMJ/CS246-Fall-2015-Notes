@@ -1,1 +1,95 @@
 Lecture 14    Const Methods / Assignment Operator / Operators As Methods VS Functions
+
+Last Time:
+	Student bobby(billy); // copy ctor
+	Student jane; // 0 parameter ctor
+	jane = bobby; 
+	jane.operator=(bobby);
+
+
+=== Assignment Operator ===
+
+	*********************************************************************
+	* struct Node {														*
+	*		Node &operator=(const Node &other) {						*
+	*				data = other.data;									*
+	*				next = other.next ? new Node(*(other.next)) : NULL; *
+	*				return *this;										*
+	*		}															*
+	* }																	*
+	*********************************************************************
+
+
+	*********************************************************************
+	* Node &Node::operator=(const Node &other) {						*
+	*				if (this == &other) return;							*
+	*				Node *tmp = next;
+	*				data = other.data;									*
+	*				next = other.next ? new Node(*(other.next)) : NULL; *
+	*				return *this;										*
+	*		}															*
+	* }																	*
+	*********************************************************************
+
+	Copy and Swap
+		********************************************************
+		* struct Node{										   *
+        *     ...										       *
+        *     void swap(Node &other){ // NOT a const reference *
+        *         // Swap all the fields of a given object.	   *
+        * 										               *
+        *         int tdata = data;							   *
+        *         data = other.data;					       *
+        *         other.data = tdata;	 				       *
+        * 										               *
+        *         Node *tnext = next;						   *
+        *         next = other.next;						   *
+        *         other.next = tnext;						   *
+        *     }										           *
+        *     Node &operator=(const Node &other){              *
+        *         Node tmp = other; // calls copy constructor  *
+        *         swap(tmp);								   *
+        *         return *this;								   *
+        *     }	-> dtor for tmp is called					   *
+        * }										   		       *
+        ********************************************************
+
+Rule of 3:
+	If you need to write a custom copy ctor / dtor / operator=, then usually you need to write all three
+
+Member Functions VS. Standalone Functions
+	- operator= must be implemented as a method
+	  operator[], operator->, operator()
+	- when an operator is implemented as a method, the LHS is represented by "this"
+
+	Vec v1(1, 2), v2(3, 4);
+	Vec v3;
+	v3 = v1 + v2;
+	Vec Vec::operator+(const Vec &rhs) {
+		Vec v(x+rhs.x, y+rhs.y);
+		return v;
+	}
+	Vec Vec::operator*(int k) {
+		Vec v(x*k, y*k);        => v1.operator*(5);
+		return v;
+	}
+	ostream &Vec::operator<<(ostream &out) {
+		out << x << " " << y;
+		return out;
+	}
+
+=== Array of Objects ===
+	struct Vec {
+		int x,y;
+		Vec(int x, int y): x(x), y(y) {}
+	}
+	Vec vectors[3];                    => don't compile
+	Vec *moreVecs = new Vec[num];
+
+	option 1: provide 0 parameter ctor
+	option 2: - stack allocated: use array initialization list
+				Vec vectors[3] = {Vec(1,2), Vec(3,4), Vec(5,6)};
+			  - heap allocated: create array of ptrs to object
+			  	Vec ** myVecs = new Vec *[num];
+			  - Vec *myVecs[10] -> stack allocated array of Vec pointers
+			  

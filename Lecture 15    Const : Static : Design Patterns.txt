@@ -1,1 +1,86 @@
 Lecture 15    Const / Static / Design Patterns / Singleton Pattern / Encapsulation
+
+struct Student {
+	int assns, mt, final;
+	mutable int numCalls;  -> A field that is mutable can always be changed
+	float grade() const {
+		++numCalls;
+		return assns * 0.4 + mt * 0.2 + final * 0.4;
+	}
+}
+const Student billy(60, 70, 80);
+billy.grade();
+const methods does not change the fields
+const objects can only call const methods
+
+=== Static Keyword ===
+	static field: associates the field with the class, not any object of the class
+	struct Student {
+		static int numObjects; // declaration
+		Student(___):_____{
+			++numObjects;
+		}
+		static void printObjectCount() {
+			cout << numObjects << endl;
+		}
+	}
+	A static field must be defined external to its type definition
+
+	In student.cc
+		int Student::numObjects = 0;
+
+=== Static Member Functions ===
+	- Do not need an object to call a member function that is static
+	int main() {
+		Student s1(......);
+		Student s2(......);
+		Student::printObjectCount();
+	}
+	- static member functions do not have access to "this" pointer
+	- static member functions can only access other static member functions & static fields;
+
+=== Design Patterns ===
+	If you have "this" kind of problem, then "this" technique might be useful.
+
+	~~~~~ Singleton Pattern ~~~~~
+		we have a class C, we want to enforce that only one instance of C is ever created
+			eg. Finances
+				Wallet - only one, a singleton
+				Expense - all need access to the wallet
+		In cstdlib, we have a function atexit, it takes a pointer to a function which has no arguments and void return type
+			- multiple calls to atexit will stack up the functions: LIFO
+		Since the wallet constructor is accessible, anyone can create a wallet: breaks the singleton pattern
+
+	~~~~~ Encapsulation ~~~~~
+		Treat objects like black boxes, capsules
+			- hide implement details
+			- client code has access to an exposed interface
+		struct Vec {
+				Vec(....):....;
+			private:
+				int x,y; // not accessible to outsiders
+			public:
+				Vec operator+(const Vec &v1) {
+					Vec v(x+v1.x, y+v1.y);
+					return v;
+				}
+		};
+		int main() {
+			Vec v1(1, 2);
+			cout << v1.x << v1.y << endl; // will not compile once private x,y
+		}
+		Advice: at lease make all fields private
+
+		C++ "Class" keyword: default visibility is private
+			class Vec {
+					int x,y;
+				public:
+					Vec(....,....) {}
+					Vec operator+(......){}
+			}
+		Making fields private
+			+ maintain class invariants
+				eg. x, y must be positive
+			+ flexibility to change implementation
+				eg. implement as polar coordinates
+				

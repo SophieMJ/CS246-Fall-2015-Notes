@@ -1,0 +1,62 @@
+Lecture 18    Design Patterns / Observer / Decorator / Factory
+
+Last Time:
+	virtual keyword -> dynamic dispatch
+	pure virtual methods -> abstract vs. concrete classes
+
+=== UML ===
+	abstract -> classname italics
+	virtual / pure virtual -> method italics
+	static -> underline
+
+=== Observer Pattern ===
+	subject / publisher -> creates data
+	observers / subscribers -> interested in data
+	A pure virtual method must be implement by a subclass to be considered concrete
+
+=== Decorator Pattern ===
+	Being able to enhance the ability pf a pre-existing object
+
+=== Factory Method Pattern ===
+					|-------|
+					| Enemy |
+					|-------|
+						↑
+						|
+		  |-------------|--------------|
+		|------|	|--------|    |--------|
+		| Boss |	| Turtle |	  | Bullet |
+		|------|	|--------|	  |--------|
+
+					|-------|
+					| Level |
+					|-------|
+						↑
+						|
+		    |-----------------------|
+		|--------|			    |--------|
+		| Normal |				| Castle |
+		|--------|				|--------|
+			↓						↓
+		- Boss never appears	- Boss occationally
+
+		class Level {
+			public:
+				virtual Enemy *createEnemy() = 0;
+		};
+		class Castle : public Level {
+			public:
+				Enemey *createEnemy() {
+					if (.....) {
+						return Boss::getInstance();
+					}
+				}
+		};
+
+		Level *l = ........;
+		Player *p = .......;
+		while (p->notDead()) {
+			Enemy *e = ......;
+
+			// attack player
+		}

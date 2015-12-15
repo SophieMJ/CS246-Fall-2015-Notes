@@ -1,0 +1,90 @@
+Lecture 22    Big Three / Casting / Exceptions
+
+Advice: construct hierarchies where the base class is abstract
+					|--------------|
+					| AbstractBook |
+					|--------------|
+							↑
+							|
+		  |-----------------|-----------------|
+	|------------| 	   |----------|    	   |-------|
+	| NormalBook |	   | TextBook |	 	   | Comic |
+	|------------|	   |----------|		   |-------|
+
+	class AbstractBook {
+			string title, author;
+			int numPages;
+		protected:
+			AbstractBook &operator=(const AbstractBook &);
+	};
+	class NormalBook {
+		public:
+			NormalBook &operator=(const NormalBook &other) {
+				AbstractBook::operator=(other);
+				return *this;
+			}
+	};
+	AbstractBook *p1 = new NormalBook(....);
+	AbstractBook *p2 = new NormalBook(....);
+	*p1 = *p2; ❌ will not compile
+
+=== Casting ===
+		Node n;
+		int *p = (int *)&n;
+	~~~ static_cast ~~~
+		int m = 9;
+		int n = 2;
+		cout << m/n; // prints 4
+		cout << static_cast<double>(m)/n; // prints 4.5
+		Book *pb = .......;
+		TextBook *ptb = static_cast<TextBook *>(pb);
+		ptb->getTopic();
+
+		DownCast: moving from superclass to a subclass
+		UncheckedCast: you are telling the compiler "Trust Me!"
+					   if you are wrong, undefined behaviour!
+
+	~~~ const_cast ~~~
+		cast to add / remove the const property
+		void library(int *p);
+		void myCode(const int *q);
+		library(q); ❌ won't compile
+		library(const_cast<int *>(q));
+
+		If library changes *p, behaviour is undefined.
+
+	~~~ reinterpret_cast ~~~
+		Vec v; //3-d vector
+		Student *sp = reinterpret_cast<Student *>(&v);
+		sp->grade(); // 0.4 * first field + 0.2 * second field + 0.4 * third field
+		dependent on low-level details of how objects are arranged in memory 
+			- not portable
+
+	~~~ dynamic_cast ~~~
+		Book *collection[100];
+		for (..........) {
+			Book *bp = collection[i];
+			TextBook *tbp = dynamic_cast<TextBook *>(bp);
+			if (tbp != NULL) { // pointing to TextBook
+				cout << tbp->getTopic();
+			} else {
+				cout << "Not a textbook!";
+			}
+		}
+
+		using dynamic_cast requires that the hierarchy have at lease one virtual method
+
+=== Runtime Type Information ===  RTTI
+		void whatIsIt(Book *bp) {
+			if (dynamic_cast<TextBook *>(bp)) {
+				cout << "Textbook";
+			} else if (dynamic_cast<Comic *>(bp)) {        ===> Highly coupled to Book hierarchy
+				cout << "Comic";
+			} else {
+				cout << "Book";
+			}
+		}
+		Book *b = c;
+		Comic &cref = dynamic_cast<Comic &>(b);
+		Q: what if a dynamic_cast to a reference fails???
+		

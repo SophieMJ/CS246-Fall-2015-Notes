@@ -1,2 +1,167 @@
 Lecture 16    Friends / System Modeling(composition, aggregation, inheritance)
 
+
+=== Friend ===
+	class Vec {
+			int x,y;
+		public:
+			Vec(.....):.....
+			int getX() const { return x; }  => accessors(getters)
+			int getY() const { return y; }
+			void setX(int v) { x = v; }  => mutators(setters)
+			void setY(int v) { y = v; }
+	};
+
+	Suppose:
+		- private fields
+		- no accessors
+		- want an output operator
+	C++ provides the "friend" keyword
+	class Vec {
+			int x,y;
+		public:
+			...
+			...
+			friend std::ostream&operator<<(....);
+	};
+	ostream &operator<<(ostream &out, const Vec &v) {
+		out << v.x << v.y;
+		return out;
+	}
+
+=== System Modeling ===
+	- identify the distractions / entities (classes)
+	- relationship between entities / classes
+
+=== UML: Unified Modeling Language ===
+	- A class in UML is a box with 3 sections
+		|----------|
+		|		-----> classname   
+		|----------|			--|
+		|		-----> fields	  |
+		|----------|			  |--->optional   - private
+		|		-----> methods	  |				  + public
+		|----------|			--|
+
+		|----------|
+		|	Vec	   | 
+		|----------|
+		| -x:Int   |
+		| -y:Int   |
+		|----------|			  
+		|+get(x)Int|		
+		|----------|
+
+=== Relationship Between Classes ===
+	~~~ Composition ~~~
+		Embed an object within another object.
+		class Vec {
+				int x,y,z;
+			public:
+				Vec(int x, int y, int z): x(x), y(y), z(z) {}
+		};
+		class Plane {
+			Vec v1,v2;
+		};
+		int main() {
+			Plane p; -> won't compile, no 0 param constructor for Vec!!!
+		}
+
+		1. provide a 0 param ctor
+		2. pre-empt the call to the zero-param ctor of Vec by calling some other ctor
+			Plane::Plane(): v1(1,2,3), v2(4,5,6) {}
+			Plane D; -> will compile
+
+		The composition relationship creates a "owns a" relation
+			A "owns a" B
+				- if B cannot exist on its own
+				- if A is destroyed, B is destroyed
+				- if A is copied, B is copied
+			 |-------|	          |-------|
+			 | Plane | 			  |  Vec  |
+			 |-------|		v1,v2 |-------|
+			 | 		 |◆---------->| -x	  |
+			 | 		 |			2 | -y	  |
+			 |-------|	0...10	  | -z	  |
+			 			0...*	  |-------|
+
+	~~~ Aggregation ~~~
+		parts on a catalog, duck in a pond
+		A "has a" B
+			- if when A is destroyed, B continues to live
+			- if A is copied, B is not copied
+			 |-------|	          		  |-------|
+			 | Pond  | 			  		  | Duck  |
+			 |-------|			  		  |-------|
+			 | 		 | ♢-------------->	  | 	  |
+			 | 		 |			 		  | 	  |
+			 |-------|	0...MAXDUCKS	  |-------|
+		class Pond {
+			Duck *duck[MAXDUCKS];
+		}
+
+	~~~ Inheritance
+		 |---------|  |----------|	|----------|
+		 | Book    |  | TextBook |	| Comic    |
+		 |---------|  |----------|	|----------|
+		 |-title   |  |-title 	 |	|-title	   |
+		 |-author  |  |-author 	 |	|-author   |
+		 |-numPages|  |-numPages |  |-numPages |
+		 |---------|  |-topic    |	|-prolog   |
+		 			  |----------|	|----------|
+		Collection of any type of Book
+			- array of void *
+			- union type 
+		Creates "is a" relationship
+			- 'TextBook' is a Book with an additional topic
+			- 'Comic' is a Book with an additional prolog
+								 |---------|  
+								 | Book    |
+								 |---------|  -> base class / super class / parent class 
+								 |-title   |  
+								 |-author  |  
+								 |-numPages|  
+								 |---------|  
+			 			              ↑
+								 	  |
+					   |-------------------------|
+					   |						 |
+	 			  |----------|				|----------|
+	 			  | TextBook |				| Comic    |
+	 			  |----------|				|----------|      -> derived class / sub class / child class
+	 			  |-title 	 |				|-title	   |
+	 			  |-author 	 |				|-author   |
+	 			  |-numPages |  			|-numPages |
+	 			  |-topic    |				|-prolog   |
+	 			  |----------|				|----------|
+	 	Derived class inherit  -> EVERYTHING from the base class
+	 		int main() {
+	 			TextBool tb = .....;
+	 			tb.getAuthor(); ✅
+	 			tb.author = "Nomair"; ❌
+	 		}
+	 		void TextBook::addAuthor(string auth) { auth += auth; }
+
+	 	TextBook has inherited private author
+	 	Private really means private
+	 	TextBook::TextBook(string t, string a, string n, string topic): title(t), author(a), numPages(n), topic(topic) {} 			-> won't compile
+
+	 	When an object is created
+	 		1. space is allocted
+	 		2. super class part of the object is created
+	 		3. field initialization
+	 		4. ctor body
+
+	 	TextBook::TextBook(string t, string a, string n, string topic): Book(t, a, n), topic(topic) {}
+			 |---------------| 	
+			 |	|---------|	 |
+			 |  |-title   |  |
+			 |  |-author  |  |
+			 |  |-numPages|  |
+			 |  |---------|  |
+			 |--|---------|--|
+			 	|-topic   |
+			 	|---------|
+		c++/inheritance/example1
+		protected: accessible by code in class and subclasses
+		

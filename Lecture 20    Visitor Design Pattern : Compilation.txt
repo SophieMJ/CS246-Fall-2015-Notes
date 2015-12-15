@@ -1,0 +1,113 @@
+Lecture 20    Visitor Design Pattern / Compilation Dependencies
+
+=== Visitor Design Pattern ===
+
+					|-------|
+					| Enemy |
+					|-------|
+						↑
+						|
+		    |-----------------------|
+		|--------|			    |--------|
+		| Turtle |				| Bullet |
+		|--------|				|--------|
+
+				   |--------|
+				   | Weapon |
+				   |--------|
+						↑
+						|
+		    |-----------------------|
+		|-------|			    |------|
+		| Stick |				| Rock |
+		|-------|				|------|
+
+		Player *p = ........;
+		while (p->notDead()) {
+			Enemy *e = ..........; // Turtle
+			Weapon *w = p->chooseWeapon(); // Stick
+			// strike enemy with weapon
+			e->strike(*w);
+		}
+
+		class Enemy {
+			public:
+				virtual void strike(Weapon &w) = 0;
+		};
+		class Turtle : public Enemy {
+			public:
+				void strike(Weapon &w) {
+					w.useOn(*this); // type Turtle
+				}
+		};
+		class Bullet : public Enemy {
+			public:
+				void strike(Weapon &w) {
+					w.useOn(*this); // type Bullet
+				}
+		};
+		class Weapon {
+			public:
+				virtual void useOn(Turtle *t) = 0;
+				virtual void useOn(Bullet *b) = 0;
+		};
+		class Stick : public Weapon {
+			public:
+				void useOn(Turtle *t) {
+					// stick is being used on a turtle
+				}
+				void useOn(Bullet *b) {
+					// stick is being used on a bullet
+				}
+		};
+
+	Visitor design pattern gives us the ability to do double dispatch by combining overriding and overloadding
+		- choosing which method to run based on the runtime type of 2 pointers
+							|------|
+							| Book | -> string type; // b book
+							|------|					t textbook
+								↑						c comic
+								|
+				    |-----------------------|
+			|----------|			    |----------|
+			| TextBook |				| Comic    |
+			|----------|				|----------|
+			|+update();|				|+update();|
+			|----------|				|----------|
+
+			author -> #
+			topic -> #
+			prolog -> #
+			map<string, int> catalog;
+			Book *collection[100];
+			for (------collection-------) {
+				collection[i]->update();
+			}
+		- require access to source code
+		- clutters the classes (No "separation of concerns")
+
+	Prepping Book hierarchy to accept visitors:
+		class Book {
+			public:
+				virtual void accept(BookVisitor &v) {
+					v.visit(*this);
+				}
+		};
+		class TextBook : public Book {
+			public:
+				void accept(BookVisitor &v) {
+					v.visit(*this);
+				}
+		};
+		class Comic : public Book {
+			public:
+				void accept(BookVisitor &v) {
+					v.visit(*this);
+				}
+		};
+		class BookVisitor {
+			public:
+				virtual void visit(Book *b) = 0;
+				virtual void visit(TextBook *t) = 0;
+				virtual void visit(Comic *c) = 0;
+		};
